@@ -9,3 +9,5 @@ DOMAIN-SUFFIX,ai.com
 # Add stripe.com
 DOMAIN-SUFFIX,invoice.stripe.com
 DOMAIN-SUFFIX,stripe.com
+#add poe.com
+DOMAIN-SUFFIX,poe.com
