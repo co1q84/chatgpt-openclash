@@ -20,3 +20,5 @@ DOMAIN-SUFFIX,bard.google.com
 DOMAIN-SUFFIX,anthropic.com
 DOMAIN-SUFFIX,claude.ai
 DOMAIN-SUFFIX,anthropic.com
+#claude
+DOMAIN-SUFFIX,claude.ai
