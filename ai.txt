@@ -29,6 +29,7 @@ payload:
   - '+.oaistatic.com'
   - '+.deepmind.com'
   - '+.chatgpt.com'
+  - '+.notebooklm.google.com'
   - '+.makersuite.google.com'
   - '+.alkalicore-pa.clients6.google.com'
   - '+.aistudio.google.com'
