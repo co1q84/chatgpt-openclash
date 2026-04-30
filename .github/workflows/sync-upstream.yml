@@ -25,14 +25,15 @@ jobs:
 
             core.setOutput('default_branch', data.default_branch);
 
-            if (!data.parent) {
-              core.setFailed('Repository does not have an upstream parent to sync from.');
-              return;
+            if (data.parent) {
+              core.setOutput('has_parent', 'true');
+              core.setOutput('parent', data.parent.full_name);
+              core.setOutput('parent_default_branch', data.parent.default_branch);
+              core.info(`Syncing with ${data.parent.full_name}`);
+            } else {
+              core.setOutput('has_parent', 'false');
+              core.info('Repository has no upstream parent; skipping fork sync.');
             }
-
-            core.setOutput('parent', data.parent.full_name);
-            core.setOutput('parent_default_branch', data.parent.default_branch);
-            core.info(`Syncing with ${data.parent.full_name}`);
 
       - name: Check out repository
         uses: actions/checkout@v4
@@ -51,6 +52,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Sync from upstream
+        if: steps.repo.outputs.has_parent == 'true'
         env:
           UPSTREAM_REPOSITORY: ${{ steps.repo.outputs.parent }}
           UPSTREAM_BRANCH: ${{ steps.repo.outputs.parent_default_branch }}
@@ -69,7 +71,7 @@ jobs:
       - name: Commit updated ruleset
         run: |
           if ! git diff --quiet; then
-            git add ai.txt proxy.txt direct.txt
+            git add ai.txt direct.txt
             git commit -m "chore: sync upstream and update rulesets"
           fi
 

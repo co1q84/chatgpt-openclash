@@ -69,7 +69,7 @@ def test_parse_classical_source_entries_accepts_payload_and_keeps_route_types():
         "  - DOMAIN-SUFFIX,youku.com",
         "  - DOMAIN-KEYWORD,douyin",
         "  - IP-CIDR,106.11.0.0/16,no-resolve",
-        "  - PROCESS-NAME,Spotify",
+        "  - PROCESS-NAME,ExampleApp",
     ]
 
     assert parse_classical_source_entries(lines) == [
@@ -102,6 +102,45 @@ def test_direct_rules_cover_mainland_video_services():
         "DOMAIN-SUFFIX,kuaishou.com",
         "DOMAIN-SUFFIX,ixigua.com",
         "DOMAIN-SUFFIX,yangshipin.cn",
+    ]
+
+    for expected_rule in expected_rules:
+        assert expected_rule in direct_rules
+
+
+def test_direct_rules_cover_mainland_banking_services():
+    direct_rules = (Path(__file__).resolve().parents[1] / "direct.list").read_text(
+        encoding="utf-8"
+    )
+
+    expected_rules = [
+        "DOMAIN-SUFFIX,icbc.com.cn",
+        "DOMAIN-SUFFIX,ccb.com",
+        "DOMAIN-SUFFIX,abchina.com",
+        "DOMAIN-SUFFIX,boc.cn",
+        "DOMAIN-SUFFIX,cmbchina.com",
+        "DOMAIN-SUFFIX,unionpay.com",
+        "DOMAIN-SUFFIX,alipay.com",
+    ]
+
+    for expected_rule in expected_rules:
+        assert expected_rule in direct_rules
+
+
+def test_direct_rules_cover_mainland_ecommerce_services():
+    direct_rules = (Path(__file__).resolve().parents[1] / "direct.list").read_text(
+        encoding="utf-8"
+    )
+
+    expected_rules = [
+        "DOMAIN-SUFFIX,taobao.com",
+        "DOMAIN-SUFFIX,tmall.com",
+        "DOMAIN-SUFFIX,jd.com",
+        "DOMAIN-SUFFIX,pinduoduo.com",
+        "DOMAIN-SUFFIX,suning.com",
+        "DOMAIN-SUFFIX,vip.com",
+        "DOMAIN-SUFFIX,xiaohongshu.com",
+        "DOMAIN-SUFFIX,dewu.com",
     ]
 
     for expected_rule in expected_rules:

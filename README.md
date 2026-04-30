@@ -1,102 +1,69 @@
-# Chaptgpt分流规则
+# ChatGPT OpenClash Rules
 
-因Chatgpt香港节点不支持，所以独立创建了一份openclash分流规则
+这个仓库只维护两类 OpenClash/Mihomo 规则：
 
-基础规则：ACL4SSR_Online_Full 全分组重度用户使用(与Github同步)  致谢：ACL4SSR
+- `ai.txt`：AI 相关域名，走代理。
+- `direct.txt`：国内视频、银行、支付等域名，直连。
 
-使用方法(到openclash配置文件处更新订阅链接)
+## 文件说明
 
-    https://api.dler.io/sub?target=clash&new_name=true&url=你的订阅链接(需要使用URL编码，)&config=https%3A%2F%2Fraw.githubusercontent.com%2Fwgetnz%2Fchatgpt%2Fmain%2FFull.ini
-    
-控制面板中，Chatgpt选择节点选择，节点选择选择除中国地区（包含香港）的其他节点即可
+- `chatgpt.list`：本地维护的 AI 补充规则。
+- `ai.sources.txt`：外部 AI 规则源，每行一个 URL。
+- `direct.list`：本地维护的电商、银行/支付、国内视频直连补充规则。
+- `direct.sources.txt`：外部电商、银行/支付、国内视频规则源，每行一个 URL。
+- `scripts/convert_chatgpt_to_ai.py`：拉取外部规则、合并本地规则、去重并生成 `ai.txt` 和 `direct.txt`。
+- `.github/workflows/sync-upstream.yml`：每天自动更新规则，也支持手动运行。
 
-如果更新规则后，仍提示地区不可用，请清除浏览器数据
-
-
-如果发现新的域名,请提交Issues.
-
-
-# 注意事项
-## 自定义规则自动集成
-
-这个仓库现在把规则分成三层：
-
-- `chatgpt.list` + `ai.sources.txt`：AI 规则的本地补充和外部源，自动合并到 `ai.txt`。
-- `proxy.list` + `proxy.sources.txt`：强制代理规则的本地补充和外部源，自动合并到 `proxy.txt`。
-- `direct.list` + `direct.sources.txt`：强制直连规则的本地补充和外部源，自动合并到 `direct.txt`。
-
-`*.list` 文件放你自己的兜底规则。`*.sources.txt` 文件放上游规则 URL，每行一个。GitHub Action 会定时拉取这些源，合并、去重，然后重新生成 `ai.txt`、`proxy.txt`、`direct.txt`。如果外部源漏了某个域名，直接加到对应的 `.list`；如果找到更好的公共规则源，把 URL 加到对应的 `.sources.txt`。
-
-`ai.txt` 使用 `behavior: domain`。`proxy.txt` 和 `direct.txt` 使用 `behavior: classical`，因此能保留 `DOMAIN`、`DOMAIN-SUFFIX`、`DOMAIN-KEYWORD`、`IP-CIDR` 等规则语义。
-
-GitHub Action `.github/workflows/sync-upstream.yml` 会每天运行一次，也可以在 GitHub 的 **Actions -> Sync fork and update rulesets -> Run workflow** 手动运行。它会执行：
-
-```bash
-python3 scripts/convert_chatgpt_to_ai.py
-```
-
-并自动生成 OpenClash/Mihomo `rule-provider` 可引用的文件：
-
-- `proxy.txt`
-- `direct.txt`
-- `ai.txt`
-
-在 OpenClash/Mihomo 配置里可以这样引用：
+## OpenClash/Mihomo 引用
 
 ```yaml
 rule-providers:
-  custom-proxy:
-    type: http
-    behavior: classical
-    url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/proxy.txt"
-    path: ./ruleset/custom-proxy.yaml
-    interval: 86400
-
-  custom-direct:
-    type: http
-    behavior: classical
-    url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/direct.txt"
-    path: ./ruleset/custom-direct.yaml
-    interval: 86400
-
-rules:
-  - RULE-SET,ai,PROXY
-  - RULE-SET,custom-proxy,PROXY
-  - RULE-SET,custom-direct,DIRECT
-```
-
-其中 `ai` 对应：
-
-```yaml
   ai:
     type: http
     behavior: domain
     url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/ai.txt"
     path: ./ruleset/ai.yaml
     interval: 86400
+
+  direct:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/direct.txt"
+    path: ./ruleset/direct.yaml
+    interval: 86400
+
+rules:
+  - RULE-SET,ai,PROXY
+  - RULE-SET,direct,DIRECT
 ```
 
-建议把 `ai` 和 `custom-proxy` 放在 `reject`、`cn`、`direct` 等通用规则前面，避免 OpenAI/Google/GitHub 这类域名被后面的规则误判成直连。
+建议把这两条规则放在 `reject`、`cn`、`direct` 等通用规则前面，避免 AI 域名被误判成直连，也避免国内视频和银行域名绕远。
 
-1. fake-ip模式存在解析异常,目前未查明原因，请使用Redir-Host 兼容 模式（fake-ip偶尔会出现状况）
+## 自动更新
 
-2. chatgpt 的网站启用了 http3 ，基于 quic ，基于 udp 如果出现还不能指定节点的情况，请开启UDP 代理，就算开启了 UDP 代理，因为 V2RAY 不支持 http3 的域名嗅探，所以基于域名的路由规则就失效了。不要全局，要不就只能基于 geoip 来。当然，最简单的办法还是把浏览器的 http3 支持给关了：（重要）
+GitHub Action 会在北京时间每天 08:00 左右运行一次：
 
-```csharp
-    chrome://flags/#enable-quic
-    edge://flags/#enable-quic
+```bash
+python3 scripts/convert_chatgpt_to_ai.py
 ```
-    
-降级成 http1/2 就能让域名路由规则生效了。
 
-订阅连接为 https://acl4ssr-sub.github.io/  接口,若担心安全问题，建议开启本地订阅，修改参数为 config=https%3A%2F%2Fraw.githubusercontent.com%2Fwgetnz%2Fchatgpt%2Fmain%2FFull.ini 即可，也可fork本项目，自行修改
+如果上游规则或本地源文件导致 `ai.txt` / `direct.txt` 变化，Action 会自动提交并推送更新。也可以在 GitHub 页面手动运行：
 
+`Actions -> Sync fork and update rulesets -> Run workflow`
 
-tips:
+要增加规则：
 
-出现openAI支付绑卡失败的，可以试试这样操作：路由器上openclash使用日本节点,开启udp模式，本机电脑装上warp+，warp+会自动连接到日本的warp+节点，再绑卡支付，账单选日本区域即可。
+- AI 域名：加到 `chatgpt.list`，或把新的上游 URL 加到 `ai.sources.txt`。
+- 直连域名：仅放电商、银行/支付、国内视频，规则加到 `direct.list`，或把新的同类上游 URL 加到 `direct.sources.txt`。
 
+## 本地生成
 
-分流规则是互联网公共服务的域名和IP地址汇总，所有数据均收集自互联网公开信息，不代表我们支持或使用这些服务。
+```bash
+python3 scripts/convert_chatgpt_to_ai.py
+```
 
-请通过【中华人民共和国 People's Republic of China】合法的互联网出入口信道访问规则中的地址，并确保在使用过程中符合相关法律法规
+生成后检查：
+
+```bash
+pytest tests/test_convert_rules.py -q
+```
