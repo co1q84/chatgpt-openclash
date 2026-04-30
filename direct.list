@@ -1,0 +1,35 @@
+# Custom direct rules extracted from 未竟.yaml.
+
+# Tencent / WeChat
+DOMAIN-SUFFIX,qq.com
+DOMAIN-SUFFIX,wechat.com
+DOMAIN-SUFFIX,weixin.qq.com
+DOMAIN-SUFFIX,qpic.cn
+DOMAIN-SUFFIX,myqcloud.com
+DOMAIN-SUFFIX,tencent-cloud.net
+
+# ByteDance / Douyin
+DOMAIN-SUFFIX,douyin.com
+DOMAIN-SUFFIX,doubao.com
+DOMAIN-SUFFIX,bytedance.com
+DOMAIN-SUFFIX,bytedance.net
+DOMAIN-SUFFIX,byteimg.com
+DOMAIN-SUFFIX,bytecdn.cn
+DOMAIN-SUFFIX,bytednsdoc.com
+DOMAIN-SUFFIX,zijieapi.com
+DOMAIN-SUFFIX,snssdk.com
+DOMAIN-SUFFIX,volcengine.com
+DOMAIN-SUFFIX,volces.com
+
+# Domestic media / CDN
+DOMAIN-SUFFIX,bilibili.com
+DOMAIN-SUFFIX,biliapi.com
+DOMAIN-SUFFIX,biliapi.net
+DOMAIN-SUFFIX,biliimg.com
+DOMAIN-SUFFIX,bilivideo.com
+DOMAIN-SUFFIX,hdslb.com
+DOMAIN-SUFFIX,acgvideo.com
+
+# Local direct keywords from 未竟.yaml
+DOMAIN-KEYWORD,huawei
+DOMAIN-KEYWORD,btnull

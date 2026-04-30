@@ -1,4 +1,4 @@
-name: Sync fork and update AI list
+name: Sync fork and update rulesets
 
 on:
   schedule:
@@ -63,14 +63,14 @@ jobs:
           git checkout ${DEFAULT_BRANCH}
           git merge --ff-only upstream/${UPSTREAM_BRANCH}
 
-      - name: Generate ai.txt from chatgpt.list
+      - name: Generate rule-provider files
         run: python3 scripts/convert_chatgpt_to_ai.py
 
       - name: Commit updated ruleset
         run: |
           if ! git diff --quiet; then
-            git add ai.txt
-            git commit -m "chore: sync upstream and update ai list"
+            git add ai.txt proxy.txt direct.txt
+            git commit -m "chore: sync upstream and update rulesets"
           fi
 
       - name: Push changes

@@ -17,6 +17,65 @@
 
 
 # 注意事项
+## 自定义规则自动集成
+
+这个仓库现在把规则分成三层：
+
+- `proxy.list`：强制代理规则源，保留 `DOMAIN`、`DOMAIN-SUFFIX`、`DOMAIN-KEYWORD` 等 Clash 规则类型。
+- `direct.list`：强制直连规则源。
+- `ai.sources.txt`：外部 AI 规则源 URL。GitHub Action 会定时拉取这些源，自动合并到 `ai.txt`。
+
+`chatgpt.list` 仍然作为你自己的 AI 规则补充源。如果外部源漏了某个域名，直接加到 `chatgpt.list`；如果找到更好的公共 AI 规则源，把 URL 加到 `ai.sources.txt`。
+
+GitHub Action `.github/workflows/sync-upstream.yml` 会每天运行一次，也可以在 GitHub 的 **Actions -> Sync fork and update rulesets -> Run workflow** 手动运行。它会执行：
+
+```bash
+python3 scripts/convert_chatgpt_to_ai.py
+```
+
+并自动生成 OpenClash/Mihomo `rule-provider` 可引用的文件：
+
+- `proxy.txt`
+- `direct.txt`
+- `ai.txt`
+
+在 OpenClash/Mihomo 配置里可以这样引用：
+
+```yaml
+rule-providers:
+  custom-proxy:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/proxy.txt"
+    path: ./ruleset/custom-proxy.yaml
+    interval: 86400
+
+  custom-direct:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/direct.txt"
+    path: ./ruleset/custom-direct.yaml
+    interval: 86400
+
+rules:
+  - RULE-SET,ai,PROXY
+  - RULE-SET,custom-proxy,PROXY
+  - RULE-SET,custom-direct,DIRECT
+```
+
+其中 `ai` 对应：
+
+```yaml
+  ai:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/ai.txt"
+    path: ./ruleset/ai.yaml
+    interval: 86400
+```
+
+建议把 `ai` 和 `custom-proxy` 放在 `reject`、`cn`、`direct` 等通用规则前面，避免 OpenAI/Google/GitHub 这类域名被后面的规则误判成直连。
+
 1. fake-ip模式存在解析异常,目前未查明原因，请使用Redir-Host 兼容 模式（fake-ip偶尔会出现状况）
 
 2. chatgpt 的网站启用了 http3 ，基于 quic ，基于 udp 如果出现还不能指定节点的情况，请开启UDP 代理，就算开启了 UDP 代理，因为 V2RAY 不支持 http3 的域名嗅探，所以基于域名的路由规则就失效了。不要全局，要不就只能基于 geoip 来。当然，最简单的办法还是把浏览器的 http3 支持给关了：（重要）

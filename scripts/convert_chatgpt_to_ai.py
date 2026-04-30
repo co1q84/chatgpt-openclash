@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Convert chatgpt.list rules into the Clash rule-set format."""
+"""Convert local Clash list rules into Mihomo/OpenClash rule-provider files."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable
+from urllib.request import Request, urlopen
 
 RULE_PREFIX_TYPES = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"}
+AI_SOURCE_URLS_FILE = "ai.sources.txt"
 
 
 def parse_rules(lines: Iterable[str]) -> list[str]:
@@ -44,15 +46,137 @@ def parse_rules(lines: Iterable[str]) -> list[str]:
     return entries
 
 
+def parse_classical_rules(lines: Iterable[str]) -> list[str]:
+    """Parse Clash rules into classical rule-provider payload entries.
+
+    Empty lines and comments are ignored. Duplicate rules are skipped while
+    keeping the original order of the remaining rules.
+    """
+
+    entries: list[str] = []
+    seen: set[str] = set()
+
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        if line not in seen:
+            seen.add(line)
+            entries.append(line)
+
+    return entries
+
+
+def normalize_ai_source_entry(entry: str) -> str | None:
+    entry = entry.strip().strip("'\"")
+    if not entry:
+        return None
+
+    if entry.startswith("+."):
+        return entry
+
+    if "," not in entry:
+        return entry
+
+    rule_type, raw_value = (part.strip() for part in entry.split(",", 1))
+    value = raw_value.split(",", 1)[0].strip()
+    if not value:
+        return None
+
+    if rule_type == "DOMAIN-SUFFIX":
+        return f"+.{value}"
+    if rule_type == "DOMAIN":
+        return value
+
+    return None
+
+
+def parse_ai_source_entries(lines: Iterable[str]) -> list[str]:
+    entries: list[str] = []
+    seen: set[str] = set()
+
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line or line.startswith("#") or line == "payload:":
+            continue
+
+        if line.startswith("- "):
+            line = line[2:].strip()
+
+        entry = normalize_ai_source_entry(line)
+        if entry is None or entry in seen:
+            continue
+
+        seen.add(entry)
+        entries.append(entry)
+
+    return entries
+
+
+def merge_unique(*entry_groups: Iterable[str]) -> list[str]:
+    entries: list[str] = []
+    seen: set[str] = set()
+
+    for group in entry_groups:
+        for entry in group:
+            if entry not in seen:
+                seen.add(entry)
+                entries.append(entry)
+
+    return entries
+
+
+def read_source_urls(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+
+    urls: list[str] = []
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line and not line.startswith("#"):
+            urls.append(line)
+
+    return urls
+
+
+def fetch_url(url: str) -> str:
+    request = Request(url, headers={"User-Agent": "chatgpt-openclash-rule-sync"})
+    with urlopen(request, timeout=30) as response:
+        return response.read().decode("utf-8")
+
+
+def build_ai_entries(repo_root: Path) -> list[str]:
+    local_entries = parse_rules(
+        (repo_root / "chatgpt.list").read_text(encoding="utf-8").splitlines()
+    )
+    source_entries: list[str] = []
+
+    for url in read_source_urls(repo_root / AI_SOURCE_URLS_FILE):
+        source_text = fetch_url(url)
+        source_entries.extend(parse_ai_source_entries(source_text.splitlines()))
+
+    return merge_unique(local_entries, source_entries)
+
+
+def write_payload(target: Path, entries: Iterable[str]) -> None:
+    output_lines = ["payload:"] + [f"  - '{entry}'" for entry in entries]
+    target.write_text("\n".join(output_lines) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    source = repo_root / "chatgpt.list"
-    target = repo_root / "ai.txt"
+    write_payload(repo_root / "ai.txt", build_ai_entries(repo_root))
 
-    payload_entries = parse_rules(source.read_text(encoding="utf-8").splitlines())
-
-    output_lines = ["payload:"] + [f"  - '{entry}'" for entry in payload_entries]
-    target.write_text("\n".join(output_lines) + "\n", encoding="utf-8")
+    jobs = [
+        ("proxy.list", "proxy.txt", parse_classical_rules),
+        ("direct.list", "direct.txt", parse_classical_rules),
+    ]
+    for source_name, target_name, parser in jobs:
+        source = repo_root / source_name
+        target = repo_root / target_name
+        payload_entries = parser(source.read_text(encoding="utf-8").splitlines())
+        write_payload(target, payload_entries)
 
 
 if __name__ == "__main__":
