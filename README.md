@@ -1,17 +1,20 @@
 # ChatGPT OpenClash Rules
 
-这个仓库只维护两类 OpenClash/Mihomo 规则：
+这个仓库只维护三类 OpenClash/Mihomo 规则：
 
 - `ai.txt`：AI 相关域名，走代理。
+- `proxy.txt`：常用海外服务厂商域名，走代理。
 - `direct.txt`：国内视频、银行、支付等域名，直连。
 
 ## 文件说明
 
 - `chatgpt.list`：本地维护的 AI 补充规则。
 - `ai.sources.txt`：外部 AI 规则源，每行一个 URL。
+- `proxy.list`：本地维护的常用海外服务厂商代理补充规则。
+- `proxy.sources.txt`：外部常用海外服务厂商规则源，每行一个 URL。
 - `direct.list`：本地维护的电商、银行/支付、国内视频直连补充规则。
 - `direct.sources.txt`：外部电商、银行/支付、国内视频规则源，每行一个 URL。
-- `scripts/convert_chatgpt_to_ai.py`：拉取外部规则、合并本地规则、去重并生成 `ai.txt` 和 `direct.txt`。
+- `scripts/convert_chatgpt_to_ai.py`：拉取外部规则、合并本地规则、去重并生成 `ai.txt`、`proxy.txt` 和 `direct.txt`。
 - `.github/workflows/sync-upstream.yml`：每天自动更新规则，也支持手动运行。
 
 ## OpenClash/Mihomo 引用
@@ -25,6 +28,13 @@ rule-providers:
     path: ./ruleset/ai.yaml
     interval: 86400
 
+  proxy:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/co1q84/chatgpt-openclash/main/proxy.txt"
+    path: ./ruleset/proxy.yaml
+    interval: 86400
+
   direct:
     type: http
     behavior: classical
@@ -34,10 +44,11 @@ rule-providers:
 
 rules:
   - RULE-SET,ai,PROXY
+  - RULE-SET,proxy,PROXY
   - RULE-SET,direct,DIRECT
 ```
 
-建议把这两条规则放在 `reject`、`cn`、`direct` 等通用规则前面，避免 AI 域名被误判成直连，也避免国内视频和银行域名绕远。
+建议把这三条规则放在 `reject`、`cn`、`direct` 等通用规则前面，避免 AI 和常用海外服务域名被误判成直连，也避免国内视频和银行域名绕远。
 
 ## 自动更新
 
@@ -47,13 +58,14 @@ GitHub Action 会在北京时间每天 08:00 左右运行一次：
 python3 scripts/convert_chatgpt_to_ai.py
 ```
 
-如果上游规则或本地源文件导致 `ai.txt` / `direct.txt` 变化，Action 会自动提交并推送更新。也可以在 GitHub 页面手动运行：
+如果上游规则或本地源文件导致 `ai.txt` / `proxy.txt` / `direct.txt` 变化，Action 会自动提交并推送更新。也可以在 GitHub 页面手动运行：
 
 `Actions -> Sync fork and update rulesets -> Run workflow`
 
 要增加规则：
 
 - AI 域名：加到 `chatgpt.list`，或把新的上游 URL 加到 `ai.sources.txt`。
+- 代理域名：仅放常用海外服务厂商，例如 Google、YouTube、X/Twitter、GitHub、Telegram、Meta、Netflix、Spotify、Cloudflare、Notion、Vercel。规则加到 `proxy.list`，或把新的厂商级上游 URL 加到 `proxy.sources.txt`。不要加入 GFW、通用 proxy、`geolocation-!cn` 这类泛化源。
 - 直连域名：仅放电商、银行/支付、国内视频，规则加到 `direct.list`，或把新的同类上游 URL 加到 `direct.sources.txt`。
 
 ## 本地生成

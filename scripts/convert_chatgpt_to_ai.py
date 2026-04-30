@@ -231,6 +231,10 @@ def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     write_payload(repo_root / "ai.txt", build_ai_entries(repo_root))
     write_payload(
+        repo_root / "proxy.txt",
+        build_classical_entries(repo_root, "proxy.list", "proxy.sources.txt"),
+    )
+    write_payload(
         repo_root / "direct.txt",
         build_classical_entries(repo_root, "direct.list", "direct.sources.txt"),
     )

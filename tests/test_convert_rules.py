@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.convert_chatgpt_to_ai import (
+    build_classical_entries,
     merge_unique,
     parse_ai_source_entries,
     parse_classical_source_entries,
@@ -145,3 +146,52 @@ def test_direct_rules_cover_mainland_ecommerce_services():
 
     for expected_rule in expected_rules:
         assert expected_rule in direct_rules
+
+
+def test_proxy_rules_cover_common_overseas_service_vendors():
+    proxy_rules = (Path(__file__).resolve().parents[1] / "proxy.list").read_text(
+        encoding="utf-8"
+    )
+
+    expected_rules = [
+        "DOMAIN-SUFFIX,google.com",
+        "DOMAIN-SUFFIX,youtube.com",
+        "DOMAIN-SUFFIX,x.com",
+        "DOMAIN-SUFFIX,twitter.com",
+        "DOMAIN-SUFFIX,github.com",
+        "DOMAIN-SUFFIX,telegram.org",
+        "DOMAIN-SUFFIX,facebook.com",
+        "DOMAIN-SUFFIX,instagram.com",
+        "DOMAIN-SUFFIX,netflix.com",
+        "DOMAIN-SUFFIX,spotify.com",
+        "DOMAIN-SUFFIX,cloudflare.com",
+        "DOMAIN-SUFFIX,notion.so",
+        "DOMAIN-SUFFIX,vercel.com",
+    ]
+
+    for expected_rule in expected_rules:
+        assert expected_rule in proxy_rules
+
+
+def test_build_classical_entries_supports_proxy_file_names(tmp_path, monkeypatch):
+    (tmp_path / "proxy.list").write_text(
+        "DOMAIN-SUFFIX,google.com\nDOMAIN-SUFFIX,x.com\n", encoding="utf-8"
+    )
+    (tmp_path / "proxy.sources.txt").write_text(
+        "https://example.test/proxy.yaml\n", encoding="utf-8"
+    )
+
+    import scripts.convert_chatgpt_to_ai as converter
+
+    monkeypatch.setattr(
+        converter,
+        "fetch_url",
+        lambda url: "payload:\n  - DOMAIN-SUFFIX,youtube.com\n  - '+.github.com'\n",
+    )
+
+    assert build_classical_entries(tmp_path, "proxy.list", "proxy.sources.txt") == [
+        "DOMAIN-SUFFIX,google.com",
+        "DOMAIN-SUFFIX,x.com",
+        "DOMAIN-SUFFIX,youtube.com",
+        "DOMAIN-SUFFIX,github.com",
+    ]
