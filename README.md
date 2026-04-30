@@ -21,11 +21,13 @@
 
 这个仓库现在把规则分成三层：
 
-- `proxy.list`：强制代理规则源，保留 `DOMAIN`、`DOMAIN-SUFFIX`、`DOMAIN-KEYWORD` 等 Clash 规则类型。
-- `direct.list`：强制直连规则源。
-- `ai.sources.txt`：外部 AI 规则源 URL。GitHub Action 会定时拉取这些源，自动合并到 `ai.txt`。
+- `chatgpt.list` + `ai.sources.txt`：AI 规则的本地补充和外部源，自动合并到 `ai.txt`。
+- `proxy.list` + `proxy.sources.txt`：强制代理规则的本地补充和外部源，自动合并到 `proxy.txt`。
+- `direct.list` + `direct.sources.txt`：强制直连规则的本地补充和外部源，自动合并到 `direct.txt`。
 
-`chatgpt.list` 仍然作为你自己的 AI 规则补充源。如果外部源漏了某个域名，直接加到 `chatgpt.list`；如果找到更好的公共 AI 规则源，把 URL 加到 `ai.sources.txt`。
+`*.list` 文件放你自己的兜底规则。`*.sources.txt` 文件放上游规则 URL，每行一个。GitHub Action 会定时拉取这些源，合并、去重，然后重新生成 `ai.txt`、`proxy.txt`、`direct.txt`。如果外部源漏了某个域名，直接加到对应的 `.list`；如果找到更好的公共规则源，把 URL 加到对应的 `.sources.txt`。
+
+`ai.txt` 使用 `behavior: domain`。`proxy.txt` 和 `direct.txt` 使用 `behavior: classical`，因此能保留 `DOMAIN`、`DOMAIN-SUFFIX`、`DOMAIN-KEYWORD`、`IP-CIDR` 等规则语义。
 
 GitHub Action `.github/workflows/sync-upstream.yml` 会每天运行一次，也可以在 GitHub 的 **Actions -> Sync fork and update rulesets -> Run workflow** 手动运行。它会执行：
 

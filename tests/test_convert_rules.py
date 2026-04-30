@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.convert_chatgpt_to_ai import (
     merge_unique,
     parse_ai_source_entries,
+    parse_classical_source_entries,
     parse_classical_rules,
     parse_rules,
 )
@@ -60,8 +61,48 @@ def test_parse_ai_source_entries_accepts_payload_and_classical_domain_rules():
     ]
 
 
+def test_parse_classical_source_entries_accepts_payload_and_keeps_route_types():
+    lines = [
+        "payload:",
+        "  - '+.bilibili.com'",
+        "  - iqiyi.com",
+        "  - DOMAIN-SUFFIX,youku.com",
+        "  - DOMAIN-KEYWORD,douyin",
+        "  - IP-CIDR,106.11.0.0/16,no-resolve",
+        "  - PROCESS-NAME,Spotify",
+    ]
+
+    assert parse_classical_source_entries(lines) == [
+        "DOMAIN-SUFFIX,bilibili.com",
+        "DOMAIN,iqiyi.com",
+        "DOMAIN-SUFFIX,youku.com",
+        "DOMAIN-KEYWORD,douyin",
+        "IP-CIDR,106.11.0.0/16,no-resolve",
+    ]
+
+
 def test_merge_unique_preserves_first_seen_order():
     assert merge_unique(
         ["+.openai.com", "+.claude.ai"],
         ["+.claude.ai", "+.gemini.google.com"],
     ) == ["+.openai.com", "+.claude.ai", "+.gemini.google.com"]
+
+
+def test_direct_rules_cover_mainland_video_services():
+    direct_rules = (Path(__file__).resolve().parents[1] / "direct.list").read_text(
+        encoding="utf-8"
+    )
+
+    expected_rules = [
+        "DOMAIN-SUFFIX,bilibili.com",
+        "DOMAIN-SUFFIX,douyin.com",
+        "DOMAIN-SUFFIX,iqiyi.com",
+        "DOMAIN-SUFFIX,youku.com",
+        "DOMAIN-SUFFIX,mgtv.com",
+        "DOMAIN-SUFFIX,kuaishou.com",
+        "DOMAIN-SUFFIX,ixigua.com",
+        "DOMAIN-SUFFIX,yangshipin.cn",
+    ]
+
+    for expected_rule in expected_rules:
+        assert expected_rule in direct_rules
