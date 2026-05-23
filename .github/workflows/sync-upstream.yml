@@ -70,8 +70,8 @@ jobs:
 
       - name: Commit updated ruleset
         run: |
-          if ! git diff --quiet; then
-            git add ai.txt direct.txt
+          git add ai.txt proxy.txt direct.txt
+          if ! git diff --cached --quiet; then
             git commit -m "chore: sync upstream and update rulesets"
           fi
 
