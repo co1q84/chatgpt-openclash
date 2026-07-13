@@ -1,4 +1,5 @@
 .DS_Store
+.worktrees/
 未竟.yaml
 OpenClash-*.log
 
