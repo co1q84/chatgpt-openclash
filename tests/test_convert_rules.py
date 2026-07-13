@@ -152,6 +152,21 @@ def test_generate_files_writes_clash_and_shadowrocket_outputs(tmp_path):
     ) == "IP-CIDR,192.0.2.0/24,no-resolve\n"
 
 
+def test_sync_workflow_stages_all_generated_files():
+    workflow = (
+        Path(__file__).resolve().parents[1]
+        / ".github"
+        / "workflows"
+        / "sync-upstream.yml"
+    ).read_text(encoding="utf-8")
+
+    assert (
+        "git add ai.txt proxy.txt direct.txt "
+        "ai-shadowrocket.list proxy-shadowrocket.list "
+        "direct-shadowrocket.list"
+    ) in workflow
+
+
 def test_direct_rules_cover_mainland_video_services():
     direct_rules = (Path(__file__).resolve().parents[1] / "direct.list").read_text(
         encoding="utf-8"
