@@ -5,11 +5,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.convert_chatgpt_to_ai import (
     build_classical_entries,
+    convert_ai_entries_to_shadowrocket,
     merge_unique,
     parse_ai_source_entries,
     parse_classical_source_entries,
     parse_classical_rules,
     parse_rules,
+    write_shadowrocket_rules,
 )
 
 
@@ -87,6 +89,36 @@ def test_merge_unique_preserves_first_seen_order():
         ["+.openai.com", "+.claude.ai"],
         ["+.claude.ai", "+.gemini.google.com"],
     ) == ["+.openai.com", "+.claude.ai", "+.gemini.google.com"]
+
+
+def test_convert_ai_entries_to_shadowrocket_uses_typed_rules():
+    assert convert_ai_entries_to_shadowrocket(
+        ["+.openai.com", "api.example.com"]
+    ) == [
+        "DOMAIN-SUFFIX,openai.com",
+        "DOMAIN,api.example.com",
+    ]
+
+
+def test_write_shadowrocket_rules_uses_plain_policy_free_format(tmp_path):
+    target = tmp_path / "rules.list"
+
+    write_shadowrocket_rules(
+        target,
+        [
+            "DOMAIN-SUFFIX,example.com",
+            "IP-CIDR,203.0.113.0/24,no-resolve",
+        ],
+    )
+
+    output = target.read_text(encoding="utf-8")
+    assert output == (
+        "DOMAIN-SUFFIX,example.com\n"
+        "IP-CIDR,203.0.113.0/24,no-resolve\n"
+    )
+    assert "payload:" not in output
+    assert "PROXY" not in output
+    assert "DIRECT" not in output
 
 
 def test_direct_rules_cover_mainland_video_services():

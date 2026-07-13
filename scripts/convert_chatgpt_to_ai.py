@@ -227,6 +227,22 @@ def write_payload(target: Path, entries: Iterable[str]) -> None:
     target.write_text("\n".join(output_lines) + "\n", encoding="utf-8")
 
 
+def convert_ai_entries_to_shadowrocket(entries: Iterable[str]) -> list[str]:
+    rules: list[str] = []
+
+    for entry in entries:
+        if entry.startswith("+."):
+            rules.append(f"DOMAIN-SUFFIX,{entry[2:]}")
+        else:
+            rules.append(f"DOMAIN,{entry}")
+
+    return rules
+
+
+def write_shadowrocket_rules(target: Path, entries: Iterable[str]) -> None:
+    target.write_text("".join(f"{entry}\n" for entry in entries), encoding="utf-8")
+
+
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     write_payload(repo_root / "ai.txt", build_ai_entries(repo_root))
