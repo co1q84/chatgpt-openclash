@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.convert_chatgpt_to_ai import (
     build_classical_entries,
     convert_ai_entries_to_shadowrocket,
+    generate_files,
     merge_unique,
     parse_ai_source_entries,
     parse_classical_source_entries,
@@ -119,6 +120,36 @@ def test_write_shadowrocket_rules_uses_plain_policy_free_format(tmp_path):
     assert "payload:" not in output
     assert "PROXY" not in output
     assert "DIRECT" not in output
+
+
+def test_generate_files_writes_clash_and_shadowrocket_outputs(tmp_path):
+    (tmp_path / "chatgpt.list").write_text(
+        "DOMAIN-SUFFIX,openai.com\n", encoding="utf-8"
+    )
+    (tmp_path / "ai.sources.txt").write_text("", encoding="utf-8")
+    (tmp_path / "proxy.list").write_text(
+        "DOMAIN-SUFFIX,google.com\n", encoding="utf-8"
+    )
+    (tmp_path / "proxy.sources.txt").write_text("", encoding="utf-8")
+    (tmp_path / "direct.list").write_text(
+        "IP-CIDR,192.0.2.0/24,no-resolve\n", encoding="utf-8"
+    )
+    (tmp_path / "direct.sources.txt").write_text("", encoding="utf-8")
+
+    generate_files(tmp_path)
+
+    assert (tmp_path / "ai.txt").read_text(encoding="utf-8") == (
+        "payload:\n  - '+.openai.com'\n"
+    )
+    assert (tmp_path / "ai-shadowrocket.list").read_text(encoding="utf-8") == (
+        "DOMAIN-SUFFIX,openai.com\n"
+    )
+    assert (tmp_path / "proxy-shadowrocket.list").read_text(
+        encoding="utf-8"
+    ) == "DOMAIN-SUFFIX,google.com\n"
+    assert (tmp_path / "direct-shadowrocket.list").read_text(
+        encoding="utf-8"
+    ) == "IP-CIDR,192.0.2.0/24,no-resolve\n"
 
 
 def test_direct_rules_cover_mainland_video_services():

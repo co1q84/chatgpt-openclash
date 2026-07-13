@@ -243,17 +243,33 @@ def write_shadowrocket_rules(target: Path, entries: Iterable[str]) -> None:
     target.write_text("".join(f"{entry}\n" for entry in entries), encoding="utf-8")
 
 
+def generate_files(repo_root: Path) -> None:
+    ai_entries = build_ai_entries(repo_root)
+    proxy_entries = build_classical_entries(
+        repo_root, "proxy.list", "proxy.sources.txt"
+    )
+    direct_entries = build_classical_entries(
+        repo_root, "direct.list", "direct.sources.txt"
+    )
+
+    write_payload(repo_root / "ai.txt", ai_entries)
+    write_payload(repo_root / "proxy.txt", proxy_entries)
+    write_payload(repo_root / "direct.txt", direct_entries)
+
+    write_shadowrocket_rules(
+        repo_root / "ai-shadowrocket.list",
+        convert_ai_entries_to_shadowrocket(ai_entries),
+    )
+    write_shadowrocket_rules(
+        repo_root / "proxy-shadowrocket.list", proxy_entries
+    )
+    write_shadowrocket_rules(
+        repo_root / "direct-shadowrocket.list", direct_entries
+    )
+
+
 def main() -> None:
-    repo_root = Path(__file__).resolve().parents[1]
-    write_payload(repo_root / "ai.txt", build_ai_entries(repo_root))
-    write_payload(
-        repo_root / "proxy.txt",
-        build_classical_entries(repo_root, "proxy.list", "proxy.sources.txt"),
-    )
-    write_payload(
-        repo_root / "direct.txt",
-        build_classical_entries(repo_root, "direct.list", "direct.sources.txt"),
-    )
+    generate_files(Path(__file__).resolve().parents[1])
 
 
 if __name__ == "__main__":
