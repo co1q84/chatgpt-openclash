@@ -2,7 +2,11 @@
 .worktrees/
 未竟.yaml
 OpenClash-*.log
-
+config.json
 .pytest_cache/
 __pycache__/
 *.py[cod]
+路由.yaml
+路由.conf
+*.conf
+*.yaml
