@@ -219,7 +219,7 @@ FALL_BOX = ss, {fall['server']}, {fall['port']}, encrypt-method={fall['cipher']}
 BOX_VISION = vless, {vision['server']}, {vision['port']}, "{vision['uuid']}", transport=tcp, flow={vision['flow']}, public-key="{vision['public_key']}", short-id={vision['short_id']}, udp=true, over-tls=true, sni={vision['sni']}, fingerprint={vision['fingerprint']}
 
 [Proxy Group]
-BEST_JC = url-test, regex=^(?!(?:BOX_VISION|FALL_BOX)$)(?!.*(?:限速|应急|测试)).+$, url=https://www.gstatic.com/generate_204, interval=300, tolerance=50, timeout=5
+BEST_JC = url-test, policy-regex-filter=^(?!(?:BOX_VISION|FALL_BOX)$)(?!.*(?:限速|应急|测试)).+$, url=https://www.gstatic.com/generate_204, interval=300, tolerance=50, timeout=5
 BOX_FIRST = fallback, BOX_VISION, FALL_BOX, url=https://www.gstatic.com/generate_204, interval=300, timeout=5
 PROXY = select, BOX_FIRST, FALL_BOX, BEST_JC
 
@@ -249,13 +249,16 @@ for section in ("General", "Proxy", "Proxy Group", "Rule"):
 required_prefixes = (
     "FALL_BOX = ss,",
     "BOX_VISION = vless,",
-    "BEST_JC = url-test,",
+    "BEST_JC = url-test, policy-regex-filter=",
     "BOX_FIRST = fallback, BOX_VISION, FALL_BOX,",
     "PROXY = select, BOX_FIRST, FALL_BOX, BEST_JC",
 )
 for prefix in required_prefixes:
     if not any(line.startswith(prefix) for line in profile.splitlines()):
         raise SystemExit(f"required profile structure missing: {prefix.split(' =')[0]}")
+
+if "BEST_JC = url-test, regex=" in profile:
+    raise SystemExit("legacy BEST_JC regex option key found")
 
 banned_patterns = (
     r"(?m)^(?:port:|socks-port:|tun:|sniffer:|dns:|proxy-providers:|proxies:|proxy-groups:|rule-providers:|rules:)",
@@ -354,7 +357,8 @@ for section in General Proxy 'Proxy Group' Rule; do
 done
 rg -q '^FALL_BOX = ss,' 未竟.conf
 rg -q '^BOX_VISION = vless,' 未竟.conf
-rg -q '^BEST_JC = url-test,' 未竟.conf
+rg -q '^BEST_JC = url-test, policy-regex-filter=' 未竟.conf
+! rg -q '^BEST_JC = url-test, regex=' 未竟.conf
 rg -q '^BOX_FIRST = fallback, BOX_VISION, FALL_BOX,' 未竟.conf
 rg -q '^PROXY = select, BOX_FIRST, FALL_BOX, BEST_JC$' 未竟.conf
 test "$(awk 'NF && $1 !~ /^#/ {last=$0} END {print last}' 未竟.conf)" = 'FINAL,PROXY'

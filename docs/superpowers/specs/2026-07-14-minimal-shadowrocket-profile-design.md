@@ -94,7 +94,7 @@ Preserve the current group names, types, order, and health-test intent:
 
 | Group | Shadowrocket type | Members and behavior |
 | --- | --- | --- |
-| `BEST_JC` | `url-test` | Select imported subscription nodes with a regex that excludes names containing `限速`, `应急`, or `测试`, and excludes the two local node names to avoid a proxy-chain cycle. Test `https://www.gstatic.com/generate_204` every 300 seconds with a 50 ms tolerance. |
+| `BEST_JC` | `url-test` | Select imported subscription nodes with Shadowrocket's canonical `policy-regex-filter` field, using a regex that excludes names containing `限速`, `应急`, or `测试`, and excludes the two local node names to avoid a proxy-chain cycle. Test `https://www.gstatic.com/generate_204` every 300 seconds with a 50 ms tolerance. |
 | `BOX_FIRST` | `fallback` | Try `BOX_VISION` first, then `FALL_BOX`, testing `https://www.gstatic.com/generate_204` every 300 seconds. |
 | `PROXY` | `select` | Offer `BOX_FIRST`, `FALL_BOX`, and `BEST_JC` in that order. |
 
@@ -172,7 +172,8 @@ Mihomo-only structures are removed or replaced as follows:
 - `未竟.conf` exists, is non-empty, ignored, and untracked.
 - `[General]`, `[Proxy]`, `[Proxy Group]`, and `[Rule]` each occur once.
 - Both proxy names and all three group names occur in the correct sections.
-- Group order and membership match this design.
+- Group order and membership match this design, with `BEST_JC` using exactly
+  `policy-regex-filter` rather than the legacy `regex` option key.
 - All five public remote-rule URLs return HTTP 200.
 - Rule order matches the ten routing stages above.
 - The last active rule is exactly `FINAL,PROXY`.
