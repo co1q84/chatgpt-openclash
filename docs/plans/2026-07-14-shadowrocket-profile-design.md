@@ -1,5 +1,7 @@
 # Shadowrocket Profile Conversion Design
 
+> **SUPERSEDED — DO NOT EXECUTE.** This document is retained only for history and contains legacy, non-minimal guidance. Use the [canonical minimal Shadowrocket profile design](../superpowers/specs/2026-07-14-minimal-shadowrocket-profile-design.md) and [canonical minimal Shadowrocket implementation plan](../superpowers/plans/2026-07-14-minimal-shadowrocket-profile.md) instead.
+
 ## Goal
 
 Convert the local, sensitive `路由.yaml` Mihomo configuration into an importable

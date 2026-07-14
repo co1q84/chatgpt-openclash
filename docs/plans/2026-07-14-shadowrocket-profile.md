@@ -1,5 +1,7 @@
 # Shadowrocket Profile Conversion Implementation Plan
 
+> **SUPERSEDED — DO NOT EXECUTE.** This document is retained only for history and contains legacy, non-minimal guidance. Use the [canonical minimal Shadowrocket profile design](../superpowers/specs/2026-07-14-minimal-shadowrocket-profile-design.md) and [canonical minimal Shadowrocket implementation plan](../superpowers/plans/2026-07-14-minimal-shadowrocket-profile.md) instead.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Replace the ignored local `路由.yaml` Mihomo profile with an ignored local `路由.conf` Shadowrocket profile that preserves its proxy groups and routing behavior while using GitHub-hosted Shadowrocket rule sets.
