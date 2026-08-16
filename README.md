@@ -4,7 +4,7 @@
 
 - `ai.txt`：AI 相关域名，走代理。
 - `proxy.txt`：常用海外服务厂商域名，走代理。
-- `direct.txt`：国内视频、银行、支付等域名，直连。
+- `direct.txt`：国内视频、银行、支付及华为手机/鸿蒙系统服务等域名，直连。
 
 ## 文件说明
 
@@ -12,7 +12,7 @@
 - `ai.sources.txt`：外部 AI 规则源，每行一个 URL。
 - `proxy.list`：本地维护的常用海外服务厂商代理补充规则。
 - `proxy.sources.txt`：外部常用海外服务厂商规则源，每行一个 URL。
-- `direct.list`：本地维护的电商、银行/支付、国内视频直连补充规则。
+- `direct.list`：本地维护的电商、银行/支付、国内视频、华为手机/鸿蒙系统服务直连补充规则。
 - `direct.sources.txt`：外部电商、银行/支付、国内视频规则源，每行一个 URL。
 - `ai.txt` / `proxy.txt` / `direct.txt`：生成的 OpenClash/Mihomo 规则集。
 - `ai-shadowrocket.list` / `proxy-shadowrocket.list` / `direct-shadowrocket.list`：生成的 Shadowrocket 远程 `RULE-SET` 规则集。
@@ -82,7 +82,7 @@ python3 scripts/convert_chatgpt_to_ai.py
 
 - AI 域名：加到 `chatgpt.list`，或把新的上游 URL 加到 `ai.sources.txt`。
 - 代理域名：仅放常用海外服务厂商，例如 Google、YouTube、X/Twitter、GitHub、Telegram、Meta、Netflix、Spotify、Cloudflare、Notion、Vercel。规则加到 `proxy.list`，或把新的厂商级上游 URL 加到 `proxy.sources.txt`。不要加入 GFW、通用 proxy、`geolocation-!cn` 这类泛化源。
-- 直连域名：仅放电商、银行/支付、国内视频，规则加到 `direct.list`，或把新的同类上游 URL 加到 `direct.sources.txt`。
+- 直连域名：仅放电商、银行/支付、国内视频、华为手机/鸿蒙系统服务，规则加到 `direct.list`，或把新的同类上游 URL 加到 `direct.sources.txt`。
 
 ## 本地生成
 

@@ -226,6 +226,39 @@ def test_direct_rules_cover_mainland_ecommerce_services():
         assert expected_rule in direct_rules
 
 
+def test_direct_rules_cover_huawei_phone_services():
+    direct_rules = (Path(__file__).resolve().parents[1] / "direct.list").read_text(
+        encoding="utf-8"
+    )
+
+    expected_rules = [
+        "DOMAIN-SUFFIX,dbank.com",
+        "DOMAIN-SUFFIX,dbankcdn.cn",
+        "DOMAIN-SUFFIX,dbankcdn.com",
+        "DOMAIN-SUFFIX,dbankcloud.asia",
+        "DOMAIN-SUFFIX,dbankcloud.cn",
+        "DOMAIN-SUFFIX,huawei.com",
+        "DOMAIN-SUFFIX,huawei.cn",
+        "DOMAIN-SUFFIX,huawei.com.cn",
+        "DOMAIN-SUFFIX,huaweiapi.com",
+        "DOMAIN-SUFFIX,huaweidevice.com",
+        "DOMAIN-SUFFIX,huaweistatic.com",
+        "DOMAIN-SUFFIX,hc-cdn.cn",
+        "DOMAIN-SUFFIX,hc-cdn.com",
+        "DOMAIN-SUFFIX,hicloud.cn",
+        "DOMAIN-SUFFIX,hicloud.com",
+        "DOMAIN-SUFFIX,dbankcloud.com",
+        "DOMAIN-SUFFIX,dbankedge.asia",
+        "DOMAIN-SUFFIX,dbankedge.cn",
+        "DOMAIN-SUFFIX,dbankedge.net",
+        "DOMAIN-SUFFIX,myhwcdn.cn",
+        "DOMAIN-SUFFIX,myhwcdn.com",
+    ]
+
+    for expected_rule in expected_rules:
+        assert expected_rule in direct_rules
+
+
 def test_proxy_rules_cover_common_overseas_service_vendors():
     proxy_rules = (Path(__file__).resolve().parents[1] / "proxy.list").read_text(
         encoding="utf-8"

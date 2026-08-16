@@ -2,6 +2,7 @@
 # 1. E-commerce
 # 2. Mainland banking / payment
 # 3. Mainland video
+# 4. Huawei phone / HarmonyOS system services
 
 # E-commerce
 DOMAIN-SUFFIX,taobao.com
@@ -72,6 +73,29 @@ DOMAIN-SUFFIX,mybank.cn
 DOMAIN-SUFFIX,bankofbeijing.com.cn
 DOMAIN-SUFFIX,bosc.cn
 DOMAIN-SUFFIX,srcb.com
+
+# Huawei phone / HarmonyOS system services
+DOMAIN-SUFFIX,dbank.com
+DOMAIN-SUFFIX,dbankcdn.cn
+DOMAIN-SUFFIX,dbankcdn.com
+DOMAIN-SUFFIX,dbankcloud.asia
+DOMAIN-SUFFIX,dbankcloud.cn
+DOMAIN-SUFFIX,dbankcloud.com
+DOMAIN-SUFFIX,dbankedge.asia
+DOMAIN-SUFFIX,dbankedge.cn
+DOMAIN-SUFFIX,dbankedge.net
+DOMAIN-SUFFIX,hc-cdn.cn
+DOMAIN-SUFFIX,hc-cdn.com
+DOMAIN-SUFFIX,hicloud.cn
+DOMAIN-SUFFIX,hicloud.com
+DOMAIN-SUFFIX,huawei.cn
+DOMAIN-SUFFIX,huawei.com
+DOMAIN-SUFFIX,huawei.com.cn
+DOMAIN-SUFFIX,huaweiapi.com
+DOMAIN-SUFFIX,huaweidevice.com
+DOMAIN-SUFFIX,huaweistatic.com
+DOMAIN-SUFFIX,myhwcdn.cn
+DOMAIN-SUFFIX,myhwcdn.com
 
 # Mainland video
 DOMAIN-SUFFIX,bilibili.com
