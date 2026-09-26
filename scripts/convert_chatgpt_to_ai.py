@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from ipaddress import ip_network
 from pathlib import Path
 from typing import Iterable
 from urllib.request import Request, urlopen
@@ -134,6 +135,10 @@ def normalize_classical_source_entry(entry: str) -> str | None:
         return f"DOMAIN,{entry}"
 
     rule_type = entry.split(",", 1)[0].strip()
+    if rule_type == "IP-CIDR":
+        _, value, *options = (part.strip() for part in entry.split(","))
+        if ip_network(value, strict=False).version == 6:
+            return ",".join(["IP-CIDR6", value, *options])
     if rule_type in CLASSICAL_RULE_TYPES:
         return entry
 

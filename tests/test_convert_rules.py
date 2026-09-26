@@ -92,6 +92,18 @@ def test_merge_unique_preserves_first_seen_order():
     ) == ["+.openai.com", "+.claude.ai", "+.gemini.google.com"]
 
 
+def test_shadowrocket_ipv6_cidr_is_compatible_with_classical_provider():
+    # Shadowrocket sources may label IPv6 networks as IP-CIDR.
+    assert parse_classical_source_entries([
+        "IP-CIDR,2620:120:e000::/40,no-resolve",
+        "IP-CIDR6,2620:120:e000::/40,no-resolve",
+        "IP-CIDR,74.125.0.0/16,no-resolve",
+    ]) == [
+        "IP-CIDR6,2620:120:e000::/40,no-resolve",
+        "IP-CIDR,74.125.0.0/16,no-resolve",
+    ]
+
+
 def test_convert_ai_entries_to_shadowrocket_uses_typed_rules():
     assert convert_ai_entries_to_shadowrocket(
         ["+.openai.com", "api.example.com"]

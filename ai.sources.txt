@@ -6,3 +6,6 @@ https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Claude/Claude.yaml
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Gemini/Gemini.yaml
 https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Copilot/Copilot.yaml
+
+# LingJingMaster/Shadowrocket-Rules (MIT): AI domain supplements.
+https://raw.githubusercontent.com/LingJingMaster/Shadowrocket-Rules/main/AI.list
