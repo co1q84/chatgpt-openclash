@@ -1,12 +1,31 @@
 .DS_Store
 .worktrees/
-未竟.yaml
 OpenClash-*.log
-config.json
 .pytest_cache/
 __pycache__/
 *.py[cod]
-路由.yaml
-路由.conf
-*.conf
+
+# 本地代理配置：含密码 / UUID / 订阅链接 / Tailscale key，禁止入库。
+# 按扩展名整类排除，新起名的配置也会被挡住（含 未竟.yaml、路由.yaml、路由.conf）。
 *.yaml
+*.yml
+*.conf
+config.json
+# 备份与编辑器残留：防止 openclash.yaml.bak / .orig / ~ 之类绕过上面的扩展名
+*.bak
+*.bak.*
+*.yaml.*
+*.yml.*
+*.conf.*
+*.orig
+*.swp
+*~
+# 运行时目录：订阅节点缓存、规则缓存、Tailscale 状态、本地备份
+/.local-backups/
+/Proxy/
+/ruleset/
+/tailscale/
+
+# 例外：GitHub Actions 工作流需要入库
+!/.github/**/*.yml
+!/.github/**/*.yaml
